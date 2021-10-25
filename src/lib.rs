@@ -1,4 +1,4 @@
-mod batchlink;
+pub mod batchlink;
 
 #[cfg(test)]
 pub mod tests {

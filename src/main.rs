@@ -1,12 +1,36 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, process::exit};
 
 use anyhow::{anyhow, Result};
+use myutil::batchlink;
 use structopt::StructOpt;
 
 fn main() -> Result<()> {
     let opt = Opt::from_args();
     init_log(opt.verbose)?;
-
+    match opt.cmd {
+        Command::Link {
+            dst,
+            src,
+            exclusive,
+            inclusive,
+            recursively,
+            force,
+        } => match batchlink::links(src, dst, &inclusive, &exclusive, recursively, force) {
+            Ok(links) => {
+                for (from, to) in links {
+                    println!(
+                        "linking {} to {}",
+                        from.to_str().unwrap(),
+                        to.to_str().unwrap()
+                    );
+                }
+            }
+            Err(e) => {
+                eprintln!("failed to link: {}", e);
+                return Err(e)
+            }
+        },
+    }
     println!("Hello, world!");
     Ok(())
 }
@@ -24,10 +48,18 @@ struct Opt {
 #[derive(Debug, StructOpt)]
 enum Command {
     Link {
+        #[structopt(short)]
         src: PathBuf,
+        #[structopt(short)]
         dst: PathBuf,
+        #[structopt(short)]
         exclusive: Vec<PathBuf>,
+        #[structopt(short)]
         inclusive: Vec<PathBuf>,
+        #[structopt(short)]
+        recursively: bool,
+        #[structopt(short)]
+        force: bool,
     },
 }
 

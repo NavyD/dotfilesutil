@@ -30,7 +30,7 @@ pub fn links<P: AsRef<Path> + Deref<Target = Path> + Debug>(
             dst
         )
     }
-
+    let src = src.canonicalize()?;
     if inclusive.iter().any(|p| !p.exists()) {
         let nonex = inclusive
             .iter()
@@ -84,7 +84,7 @@ pub fn links<P: AsRef<Path> + Deref<Target = Path> + Debug>(
             trace!("skipped a non file {:?}", cur);
             continue;
         }
-
+        trace!("cur {:?}, src: {:?}", cur, src);
         let rel_path = cur.strip_prefix(&src)?;
         debug!(
             "check relative path: {:?} for src: {:?}, cur: {:?}",

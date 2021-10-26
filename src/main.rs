@@ -1,7 +1,7 @@
-use std::{path::PathBuf, process::exit};
+use std::path::PathBuf;
 
 use anyhow::{anyhow, Result};
-use myutil::batchlink;
+use dotfileutil::batchlink;
 use structopt::StructOpt;
 
 fn main() -> Result<()> {
@@ -27,7 +27,7 @@ fn main() -> Result<()> {
             }
             Err(e) => {
                 eprintln!("failed to link: {}", e);
-                return Err(e)
+                return Err(e);
             }
         },
     }

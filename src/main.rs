@@ -1,12 +1,12 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, process::exit};
 
 use anyhow::{anyhow, Result};
-use dotfileutil::batchlink;
+use dotfileutil::{batchlink, completions::gen_zsh_cmd_completion};
 use structopt::StructOpt;
 
-fn main() -> Result<()> {
+fn main() {
     let opt = Opt::from_args();
-    init_log(opt.verbose)?;
+    init_log(opt.verbose).expect("init log");
     match opt.cmd {
         Command::Link {
             dst,
@@ -27,12 +27,23 @@ fn main() -> Result<()> {
             }
             Err(e) => {
                 eprintln!("failed to link: {}", e);
-                return Err(e);
+                exit(1)
             }
         },
+        Command::Completions { gen } => match gen {
+            CompletionsGen::Cmd {
+                completion_option,
+                name,
+                version_option,
+            } => match gen_zsh_cmd_completion(&name, &version_option, &completion_option) {
+                Ok(s) => println!("{}", s),
+                Err(e) => {
+                    eprintln!("{}", e);
+                    exit(1);
+                }
+            },
+        },
     }
-    println!("Hello, world!");
-    Ok(())
 }
 
 #[derive(Debug, StructOpt)]
@@ -61,9 +72,35 @@ enum Command {
         #[structopt(short)]
         force: bool,
     },
+    Completions {
+        #[structopt(subcommand)]
+        gen: CompletionsGen,
+    },
+}
+
+#[derive(Debug, StructOpt)]
+enum CompletionsGen {
+    /// Generate updatable Zsh complements for commands with complements。
+    ///
+    /// usage:
+    ///
+    /// <bin> completions cmd -n poetry -v='--version' -c="completions zsh"
+    ///
+    /// Note that `-v --version` cannot be parsed in structopt, use `=` to separate
+    Cmd {
+        #[structopt(short)]
+        name: String,
+
+        #[structopt(short)]
+        version_option: String,
+
+        #[structopt(short)]
+        completion_option: String,
+    },
 }
 
 fn init_log(verbose: u8) -> Result<()> {
+    env!("PATH");
     if verbose > 4 {
         return Err(anyhow!("invalid arg: 4 < {} number of verbose", verbose));
     }

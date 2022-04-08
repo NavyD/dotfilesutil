@@ -111,3 +111,36 @@ fn init_log(verbose: u8) -> Result<()> {
         .init();
     Ok(())
 }
+
+#[test]
+fn test() -> Result<()> {
+    Ok(())
+}
+
+mod notifya {
+    use std::path::{Path, PathBuf};
+
+    use anyhow::Result;
+
+    trait Sender<T>: Sized {
+        fn try_send(&self, msg: T) -> Result<(), T>;
+    }
+
+    trait Receiver<T> {
+        fn recv(&self) -> Result<T>;
+
+        fn try_recv(&self) -> Result<T>;
+    }
+
+    impl<T> Sender<T> for std::sync::mpsc::Sender<T> {
+        fn try_send(&self, msg: T) -> Result<(), T> {
+            self.send(msg).map_err(|e| e.0)
+        }
+    }
+
+    trait Notify {
+        fn register<P: AsRef<Path>>(&self, path: P, depth: usize);
+
+        // fn watch(&self) -> Receiver<(PathBuf, PathBuf)>;
+    }
+}

@@ -1,5 +1,6 @@
 pub mod batchlink;
 pub mod completions;
+mod backup;
 
 #[cfg(test)]
 pub mod tests {

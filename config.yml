@@ -1,0 +1,13 @@
+directories:
+
+backup:
+  delay: 30s
+  exclude-pat:
+    - $HOME/.config/a
+    - *.exe
+  source:
+    directories:
+      - $HOME/.config
+      - /etc/docker
+  target:
+    root: $HOME/a
